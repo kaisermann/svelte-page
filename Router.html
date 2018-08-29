@@ -3,33 +3,58 @@
 {/if}
 
 <script>
-  import page from 'page';
+  import page from 'page'
 
   /** Creates a route callback with the specified data */
-  const handler = (component, data = {}) => {
+  const getComponentMiddleware = (path, component, data = {}) => {
     /** Allow { component, data } value */
-    if(component.component) {
-      ({ component, data } = component);
+    if (component.component) {
+      ;({ component, data } = component)
     }
 
     return (ctx, next) => {
-      const { components, params, state: { path, ...state } } = ctx
+      const {
+        components,
+        params,
+        state: { path, ...state },
+      } = ctx
       data.params = params
 
       components.push({
         component,
         data: Object.assign(data, state),
-      });
+      })
 
-      next();
+      next()
     }
-  };
+  }
+
+  const getSveltedHierarchy = Router => ctx => {
+    const { components } = ctx
+    const props = {}
+
+    /** Data needs to always be an object or else nesting won't work */
+    components.reduce((prev, { component, data = {} }) => {
+      data.page = null
+      prev.page = {
+        child: component,
+        props: data,
+      };
+
+      return prev.page.props;
+    }, props);
+
+    if (Router.store) {
+      Router.store.fire('router:navigation', ctx)
+    }
+    Router.set(props)
+  }
 
   export default {
     setup(Router) {
-      Router.go = page.show;
-      Router.back = page.back;
-      Router.getCurrentPath = () => page.current;
+      Router.go = page.show
+      Router.back = page.back
+      Router.getCurrentPath = () => page.current
     },
     data() {
       return {
@@ -39,53 +64,29 @@
       }
     },
     onstate({ previous, current }) {
-      if(!previous) {
-        const { routes, strict, hashbang } = current;
+      if (!previous) {
+        const { routes, strict, hashbang } = current
 
         /** Set up the component hierarchy */
         page('*', (ctx, next) => {
-          ctx.components = [];
-          next();
-        });
+          ctx.components = []
+          next()
+        })
 
         /** Generate page routes */
         Object.keys(routes).forEach(path =>
-          page(path, handler(routes[path]))
-        );
+          page(path, getComponentMiddleware(path, routes[path])),
+        )
 
         /** Translate component array into svelte state */
-        page('*', ctx => {
-          const { components } = ctx;
-          const props = {};
-
-          /** Data needs to always be an object or else nesting won't work */
-          components.reduce((prev, { component, data = {} }) => {
-            /**
-             * Setting page to null is important to avoid stale state
-             * bugs when moving up & down the tree
-             * */
-            data.page = null;
-            prev.page = {
-              child: component,
-              props: data,
-            };
-
-            return prev.page.props;
-          }, props);
-
-          props.path = ctx.pathname
-          if(this.store) {
-            this.store.fire('router:navigation', ctx);
-          }
-          this.set(props);
-        });
+        page('*', getSveltedHierarchy(this))
 
         /** Allow trailing slash */
-        page.strict(strict);
-        /** Start the router */
-        page.start({ hashbang });
-      }
-    }
+        page.strict(strict)
 
+        /** Start the router */
+        page.start({ hashbang })
+      }
+    },
   }
 </script>
