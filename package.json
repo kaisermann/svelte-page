@@ -1,10 +1,12 @@
 {
   "name": "@kaisermann/svelte-router",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "description": "Why not another option for routing in svelte?",
   "author": "Christian Kaisermann <christian@kaisermann.me>",
-  "repository": "https://github.com/kaisermann",
+  "repository": "https://github.com/kaisermann/svelte-router",
+  "main": "./Router.html",
+  "svelter": "./Router.html",
   "keywords": [
     "svelte",
     "router"
