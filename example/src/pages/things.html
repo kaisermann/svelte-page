@@ -1,0 +1,22 @@
+<h2>Things!</h2>
+
+<p>foo: {foo}</p>
+
+<a href="/things/thing-1/">Thing 1</a> |
+<a href="/things/thing-2/">Thing 2</a>
+
+<script>
+  export default {
+    oncreate() {
+        console.log("things.oncreate", this.get());
+    },
+
+    onstate(state) {
+        console.log("things.onstate", state);
+    },
+
+    ondestroy() {
+        console.log("things.ondestroy", this.get());
+    },
+  };
+</script>

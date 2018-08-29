@@ -1,0 +1,24 @@
+<h3>Thing {params.thing}!</h3>
+
+<a href="/things/{params.thing}">Thing</a> | <a href="/things/{params.thing}/subthing">Subthing</a>
+
+<NestedRoute {page} />
+
+<script>
+  export default {
+    components: {
+      NestedRoute: '../../../NestedRoute.html'
+    },
+    oncreate() {
+        console.log("thing.oncreate", this.get());
+    },
+
+    onstate(state) {
+        console.log("thing.onstate", state);
+    },
+
+    ondestroy() {
+        console.log("thing.ondestroy");
+    },
+  };
+</script>

@@ -1,0 +1,19 @@
+{#if page}
+  <svelte:component
+    this={page.child}
+    {...page.props}
+    on:action
+    on:response
+    on:event
+  />
+{/if}
+
+<script>
+  export default {
+    data() {
+      return {
+        page: null
+      }
+    }
+  }
+</script>

@@ -1,47 +1,173 @@
-# svelte-loadable
+# @kaisermann/svelte-router
 
-> Dynamically load a svelte component. Based on [react-loadable](https://github.com/jamiebuilds/react-loadable).
+> Nested routing with [`page.js`](https://github.com/visionmedia/page.js) for svelte
 
 ## How to use
 
-- Props
-  - `loader`: a function which `import()` your component to the `<Loadable>` component;
-  - `delay`: minimum delay in `msecs` for showing the `loading slot`;
-  - `timeout`: time in `msecs` for showing the `timeout slot`.
+1. Build a object with all your routes:
 
-- Slots
-  - `loading`: customizes the loading state;
-  - `error`: customizes the error state. You can `bind:error` to have access to the error variable;
-  - `timeout`: customizes the timeout state. Will only appear if `timeout` prop is defined;
-  - `success`: customizes the imported component render (add props, etc).
+```js
+export default {
+  '/': home,
+  '/other': other,
+  '/things': {
+    component: things,
+    data: { foo: 'A custom property' },
+  },
+  '/things/:thing*': thing,
+  '/things/:thing/subthing/': subthing,
+}
+```
 
-- Methods
-  - Use the `.load()` method to retry loading.
-
-## Example
+2. Pass it to the `<Router />`
 
 ```html
-<Loadable ref:loadable {loader} bind:error>
-  <div slot="loading">Loading...</div>
-  <div slot="error">
-    {error}
-    <br>
-    <button on:click="refs.loadable.load()">Try again</button>
-  </div>
-</Loadable>
+<Router routes={routes} />
 
 <script>
+  import routes from './routes.js'
+
   export default {
-    components: {
-      Loadable: 'svelte-loadable',
-    },
     data() {
       return {
-        loader: () => import('./AsyncComponent.html'),
+        routes
       }
     }
   }
 </script>
 ```
 
-For more examples, please check the [`example/src/App.html`](https://github.com/kaisermann/svelte-loadable/blob/master/example/src/App.html) file.
+Every page may receive the following properties:
+
+- Any property passed to the page programatically with the `Router.go(path, { ...props })` or in the `routes.js` definition
+- `params` - An object representing all the parameters from the URL
+- `page`
+  - `child` - The nested route component that should be rendered;
+  - `props` - The props that should be passed to the nested component
+
+3. For nested routes, use the `<NestedRoute>`
+
+```html
+Here is my sub-page:
+<br>
+<NestedRoute {page} />
+
+<script>
+  export default {
+    components: {
+      NestedRoute: '@kaisermann/svelte-router/NestedRoute.html'
+    }
+  }
+</script>
+```
+
+`<NestedRoute />` can fire events to allow communication between parent and child pages.
+
+Available events:
+
+- `action`
+- `response`
+- `event`
+
+**Example:**
+
+```html
+<NestedRoute on:action="handle(event)" />
+```
+
+## Props
+
+```html
+<Router
+  routes={routes}
+  strict={true}
+  hashbang={true}
+>
+```
+
+- `routes` - The routes object `(default: undefined)`
+- `strict` - If false, match trailling slash `(default: true)`
+- `hashbang` - Add `#!` before urls `(default: true)`
+
+## Static methods
+
+```js
+import Router from '@kaisermann/svelte-router/Router.html';
+
+/** Show the specified route with an optional data object */
+Router.go(path, optionalData)
+
+/** Go back to the previous route */
+Router.back()
+```
+
+## Store events
+
+If a svelte store is available, the `<Router />` will emit:
+
+- `route:navigation` whenever there's a route change.
+
+```js
+store.on('router:navigation', context => {
+  console.log('Current path:', context.path);
+})
+```
+
+## Example
+
+**App.html**
+
+```html
+<Router {routes} />
+
+<script>
+  import Home from './routes/Home.html';
+  import About from './routes/About.html';
+  import AboutPersonTemplate from './routes/AboutPersonTemplate.html';
+  import AboutPerson from './routes/AboutPerson.html';
+
+  export default {
+    components: {
+      Router: '@kaisermann/svelte-router/Router.html',
+    },
+    data() {
+      return {
+        routes: {
+          "/": Home,
+          /** About page will have a {name} prop */
+          "/about": {
+            component: About,
+            data: { name: 'Text name' }
+          },
+          /**
+           * Page will have {page.child} because of nested routes
+           **/
+          "/about/*": AboutPersonTemplate
+          /** Page will have a {params.whoami} prop */
+          "/about/:whoami": AboutPerson
+        }
+      }
+    }
+  }
+</script>
+```
+
+**AboutPersonTemplate.html**
+
+```html
+<NestedRoute {page} />
+
+<script>
+  export default {
+    components: {
+      Router: '@kaisermann/svelte-router/NestedRoute.html',
+    },
+  }
+</script>
+```
+
+For more examples, please check the [`example/src/routes.js`](https://github.com/kaisermann/svelte-router/blob/master/example/src/routes.js) file.
+
+## Credits and inspirations
+
+- [tivac/svelte-routing](https://github.com/tivac/svelte-routing/) :grin:

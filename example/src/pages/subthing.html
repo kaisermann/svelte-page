@@ -1,0 +1,17 @@
+<h4>Subthing {params.thing}!</h4>
+
+<script>
+  export default {
+    oncreate() {
+        console.log("subthing.oncreate", this.get());
+    },
+
+    onstate(state) {
+        console.log("subthing.onstate", state);
+    },
+
+    ondestroy() {
+        console.log("subthing.ondestroy");
+    },
+  };
+</script>

@@ -1,0 +1,20 @@
+<h1>APP</h1>
+
+<a href="/">Home</a> | <a href="/things">Things</a> | <a href="/other">Other</a>
+
+<Router {routes} />
+
+<script>
+  import routes from './routes.js';
+
+  export default {
+    components: {
+      Router: '../../Router.html',
+    },
+    data() {
+      return {
+        routes
+      }
+    }
+  }
+</script>
