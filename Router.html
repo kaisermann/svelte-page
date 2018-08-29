@@ -59,7 +59,6 @@
           const props = {};
 
           /** Data needs to always be an object or else nesting won't work */
-          console.log(components)
           components.reduce((prev, { component, data = {} }) => {
             /**
              * Setting page to null is important to avoid stale state
