@@ -99,6 +99,9 @@ Router.go(path, optionalData)
 
 /** Go back to the previous route */
 Router.back()
+
+/** Get the router current path */
+Router.getCurrentPath() // '/about/me'
 ```
 
 ## Store events
