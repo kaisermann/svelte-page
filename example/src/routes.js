@@ -1,16 +1,22 @@
-import home from "./pages/home.html";
-import other from "./pages/other.html";
-import things from "./pages/things.html";
-import thing from "./pages/thing.html";
-import subthing from "./pages/subthing.html";
+import home from './pages/home.html'
 
 export default {
-  "/": home,
-  "/other": other,
-  "/things": {
-    component: things,
-    data: { foo : "This is a foo value" }
+  '/': {
+    component: home,
+    preload: ['/other', '/things'],
   },
-  "/things/:thing*": thing,
-  "/things/:thing/subthing/": subthing,
+  '/other': {
+    loader: () => import('./pages/other.html'),
+  },
+  '/things': {
+    loader: () => import('./pages/things.html'),
+    data: { foo: 'This is a foo value' },
+  },
+  '/things/:thing*': {
+    loader: () => import('./pages/thing.html'),
+    preload: ['/things/:thing/subthing/'],
+  },
+  '/things/:thing/subthing/': {
+    loader: () => import('./pages/subthing.html'),
+  },
 }

@@ -1,15 +1,31 @@
 {#if page}
-  <svelte:component this={page.child} {...page.props} />
-{/if}
+<svelte:component this={page.child} {...page.props} /> {/if}
 
 <script>
   import page from 'page'
 
   /** Creates a route callback with the specified data */
-  const getComponentMiddleware = (path, component, data = {}) => {
-    /** Allow { component, data } value */
-    if (component.component) {
-      ;({ component, data } = component)
+  const getRouteMiddleware = (routePath, routes) => {
+    if (routes[routePath].constructor !== Object) {
+      routes[routePath] = { component: routes[routePath] }
+    }
+
+    const { data = {}, loader } = routes[routePath]
+    let hasPreloaded = false
+
+    const loadPreloads = () => {
+      const { preload } = routes[routePath]
+      setTimeout(() =>
+        preload.forEach(preloadRoute => {
+          const loader = routes[preloadRoute].loader
+          if (typeof loader === 'function') {
+            loader().then(({ default: component }) => {
+              routes[preloadRoute].component = component
+            })
+          }
+        }),
+      )
+      hasPreloaded = true
     }
 
     return (ctx, next) => {
@@ -18,13 +34,36 @@
         params,
         state: { path, ...state },
       } = ctx
-      data.params = params
 
-      components.push({
-        component,
-        data: Object.assign(data, state),
-      })
+      const { component, preload } = routes[routePath]
 
+      /** Remove pathregexp path match */
+      delete params[0]
+      const routeData = Object.assign({}, data, state, { params })
+
+      /** If no component present and */
+      if (!component) {
+        /** If there's a loader function, load it */
+        if (typeof loader === 'function') {
+          loader().then(({ default: component }) => {
+            components.push({ component, data: routeData })
+            if (preload && !hasPreloaded) {
+              loadPreloads()
+            }
+            next()
+          })
+        } else {
+          throw new Error(
+            '[svelte-router] No component for route "' + routePath + '"',
+          )
+        }
+        return
+      }
+
+      components.push({ component, data: routeData })
+      if (preload && !hasPreloaded) {
+        loadPreloads()
+      }
       next()
     }
   }
@@ -39,10 +78,10 @@
       prev.page = {
         child: component,
         props: data,
-      };
+      }
 
-      return prev.page.props;
-    }, props);
+      return prev.page.props
+    }, props)
 
     if (Router.store) {
       Router.store.fire('router:navigation', ctx)
@@ -75,7 +114,7 @@
 
         /** Generate page routes */
         Object.keys(routes).forEach(path =>
-          page(path, getComponentMiddleware(path, routes[path])),
+          page(path, getRouteMiddleware(path, routes)),
         )
 
         /** Translate component array into svelte state */
