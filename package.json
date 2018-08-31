@@ -1,5 +1,5 @@
 {
-  "name": "@kaisermann/svelte-router",
+  "name": "svelte-page",
   "version": "0.0.5",
   "license": "MIT",
   "description": "Why not another option for routing in svelte?",

@@ -1,4 +1,4 @@
-# @kaisermann/svelte-router
+# svelte-page
 
 > Nested routing with [`page.js`](https://github.com/visionmedia/page.js) for svelte
 
@@ -55,7 +55,7 @@ Here is my sub-page:
 <script>
   export default {
     components: {
-      NestedRoute: '@kaisermann/svelte-router/NestedRoute.html'
+      NestedRoute: 'svelte-page/NestedRoute.html'
     }
   }
 </script>
@@ -92,7 +92,7 @@ Available events:
 ## Static methods
 
 ```js
-import Router from '@kaisermann/svelte-router/Router.html';
+import Router from 'svelte-page/Router.html';
 
 /** Show the specified route with an optional data object */
 Router.go(path, optionalData)
@@ -131,7 +131,7 @@ store.on('router:navigation', context => {
 
   export default {
     components: {
-      Router: '@kaisermann/svelte-router/Router.html',
+      Router: 'svelte-page/Router.html',
     },
     data() {
       return {
@@ -163,7 +163,7 @@ store.on('router:navigation', context => {
 <script>
   export default {
     components: {
-      Router: '@kaisermann/svelte-router/NestedRoute.html',
+      Router: 'svelte-page/NestedRoute.html',
     },
   }
 </script>
