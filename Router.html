@@ -102,30 +102,28 @@
         hashbang: true,
       }
     },
-    onstate({ previous, current }) {
-      if (!previous) {
-        const { routes, strict, hashbang } = current
+    oncreate() {
+      const { routes, strict, hashbang } = this.get();
 
-        /** Set up the component hierarchy */
-        page('*', (ctx, next) => {
-          ctx.components = []
-          next()
-        })
+      /** Set up the component hierarchy */
+      page('*', (ctx, next) => {
+        ctx.components = []
+        next()
+      })
 
-        /** Generate page routes */
-        Object.keys(routes).forEach(path =>
-          page(path, getRouteMiddleware(path, routes)),
-        )
+      /** Generate page routes */
+      Object.keys(routes).forEach(path =>
+        page(path, getRouteMiddleware(path, routes)),
+      )
 
-        /** Translate component array into svelte state */
-        page('*', getSveltedHierarchy(this))
+      /** Translate component array into svelte state */
+      page('*', getSveltedHierarchy(this))
 
-        /** Allow trailing slash */
-        page.strict(strict)
+      /** Allow trailing slash */
+      page.strict(strict)
 
-        /** Start the router */
-        page.start({ hashbang })
-      }
-    },
+      /** Start the router */
+      page.start({ hashbang })
+    }
   }
 </script>

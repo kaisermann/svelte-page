@@ -1,6 +1,6 @@
 {
   "name": "@kaisermann/svelte-router",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "description": "Why not another option for routing in svelte?",
   "author": "Christian Kaisermann <christian@kaisermann.me>",
