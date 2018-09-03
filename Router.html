@@ -84,9 +84,14 @@
     }, props)
 
     if (Router.store) {
+      Router.store.fire('router:beforeNavigation', ctx)
+    }
+
+    Router.set(props)
+
+    if (Router.store) {
       Router.store.fire('router:navigation', ctx)
     }
-    Router.set(props)
   }
 
   export default {

@@ -108,7 +108,8 @@ Router.getCurrentPath() // '/about/me'
 
 If a svelte store is available, the `<Router />` will emit:
 
-- `route:navigation` whenever there's a route change.
+- `route:beforeNavigation` before a route render.
+- `route:navigation` after a route render.
 
 ```js
 store.on('router:navigation', context => {
