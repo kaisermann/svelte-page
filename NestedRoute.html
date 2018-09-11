@@ -6,6 +6,8 @@
     on:response
     on:event
   />
+{:else}
+  <slot></slot>
 {/if}
 
 <script>
@@ -13,6 +15,11 @@
     data() {
       return {
         page: null
+      }
+    },
+    onupdate({ changed, current }) {
+      if(changed.page && current.page == null) {
+        this.fire('notFound')
       }
     }
   }

@@ -89,19 +89,27 @@ Available events:
 - `strict` - If false, match trailling slash `(default: true)`
 - `hashbang` - Add `#!` before urls `(default: true)`
 
-## Static methods
+## Slots
 
-```js
-import Router from 'svelte-page/Router.html';
+Both `<Router>` and `<NestedRoute>` have the optional `default` slot which is only rendered when the current route isn't associated with any component.
 
-/** Show the specified route with an optional data object */
-Router.go(path, optionalData)
+```html
+<Router ...>
+  404 - Route not found
+</Router>
 
-/** Go back to the previous route */
-Router.back()
+<NestedRoute>
+  Nested route not found
+</NestedRoute>
+```
 
-/** Get the router current path */
-Router.getCurrentPath() // '/about/me'
+## Events
+
+When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFound` event.
+
+```html
+<Router on:notFound="console.log('Route not found!!!')" />
+<NestedRoute on:notFound="console.log('NestedRoute not found!!!')" />
 ```
 
 ## Store events
@@ -115,6 +123,21 @@ If a svelte store is available, the `<Router />` will emit:
 store.on('router:navigation', context => {
   console.log('Current path:', context.path);
 })
+```
+
+## Static methods
+
+```js
+import Router from 'svelte-page/Router.html';
+
+/** Show the specified route with an optional data object */
+Router.go(path, optionalData)
+
+/** Go back to the previous route */
+Router.back()
+
+/** Get the router current path */
+Router.getCurrentPath() // '/about/me'
 ```
 
 ## Example
