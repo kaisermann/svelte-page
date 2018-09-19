@@ -1,6 +1,6 @@
 {
   "name": "svelte-page",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "Why not another option for routing in svelte?",
   "author": "Christian Kaisermann <christian@kaisermann.me>",
