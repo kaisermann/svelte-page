@@ -1,16 +1,12 @@
-{#if _hasDefaultSlot}
-  <NestedRoute {page} on:notFound>
-    <slot></slot>
-  </NestedRoute>
-{:else}
-  <NestedRoute {page}/>
-{/if}
+<NestedRoute {page} on:notFound>
+  <slot></slot>
+</NestedRoute>
 
 <script>
   import page from 'page'
 
   const fire = (Router, event, value) => {
-    if(Router.store) {
+    if (Router.store) {
       Router.store.fire(event, value)
     }
     Router.root.fire(event, value)
@@ -82,7 +78,7 @@
 
   const getSveltedHierarchy = Router => ctx => {
     const { components } = ctx
-    const props = { page: null }
+    const props = { page: null, context: ctx }
 
     /** Data needs to always be an object or else nesting won't work */
     components.reduce((prev, { component, data = {} }) => {
@@ -116,15 +112,16 @@
         page: null,
         strict: true,
         hashbang: true,
-        _hasDefaultSlot: false,
+        context: null,
+      }
+    },
+    onstate({ previous }) {
+      if (!previous) {
+        this.root.router = this
       }
     },
     oncreate() {
       const { routes, strict, hashbang } = this.get()
-
-      if (this.options.slots && this.options.slots['default']) {
-        this.set({ _hasDefaultSlot: true })
-      }
 
       /** Set up the component hierarchy */
       page('*', (ctx, next) => {
@@ -146,5 +143,8 @@
       /** Start the router */
       page.start({ hashbang })
     },
+    ondestroy() {
+      delete this.root.router
+    }
   }
 </script>

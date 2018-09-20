@@ -112,7 +112,7 @@ When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFou
 <NestedRoute on:notFound="console.log('NestedRoute not found!!!')" />
 ```
 
-## Root and store events
+## Root and Store events
 
 The `<Router />` emits events on the `root` component and, if available, on the `store`:
 
@@ -121,18 +121,33 @@ The `<Router />` emits events on the `root` component and, if available, on the 
 
 ```js
 this.store.on('router:navigation', context => {
-  console.log('Current path:', context.path);
+  console.log('Current path:', context.path)
 })
 
 this.root.on('router:navigation', context => {
-  console.log('Current path:', context.path);
+  console.log('Current path:', context.path)
 })
+```
+
+The `<Router />` adds itself to the `root` component as a `router` property, so it's also possible to get the context by observing its lifecycle:
+
+```html
+<!-- Some other component down the hierarchy -->
+<script>
+  export default {
+    oncreate() {
+      this.root.router.on('update', ({ current }) => {
+        console.log('Current path:', current.context.path)
+      })
+    }
+  }
+</script>
 ```
 
 ## Static methods
 
 ```js
-import Router from 'svelte-page/Router.html';
+import Router from 'svelte-page/Router.html'
 
 /** Show the specified route with an optional data object */
 Router.go(path, optionalData)
