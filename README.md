@@ -114,17 +114,13 @@ When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFou
 
 ## Root and Store events
 
-The `<Router />` emits events on the `root` component and, if available, on the `store`:
+The `<Router />` emits events on the `store`:
 
 - `router:beforeNavigation` before a route render.
 - `router:navigation` after a route render.
 
 ```js
 this.store.on('router:navigation', context => {
-  console.log('Current path:', context.path)
-})
-
-this.root.on('router:navigation', context => {
   console.log('Current path:', context.path)
 })
 ```

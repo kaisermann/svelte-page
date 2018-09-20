@@ -5,13 +5,6 @@
 <script>
   import page from 'page'
 
-  const fire = (Router, event, value) => {
-    if (Router.store) {
-      Router.store.fire(event, value)
-    }
-    Router.root.fire(event, value)
-  }
-
   /** Creates a route callback with the specified data */
   const getRouteMiddleware = (routePath, routes) => {
     if (routes[routePath].constructor !== Object) {
@@ -91,11 +84,11 @@
       return prev.page.props
     }, props)
 
-    fire(Router, 'router:beforeNavigation', ctx)
+    Router.store.fire('router:beforeNavigation', ctx)
 
     Router.set(props)
 
-    fire(Router, 'router:navigation', ctx)
+    Router.store.fire('router:navigation', ctx)
   }
 
   export default {
