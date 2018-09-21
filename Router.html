@@ -71,7 +71,11 @@
 
   const getSveltedHierarchy = Router => ctx => {
     const { components } = ctx
-    const props = { page: null, context: ctx }
+    const props = {
+      page: null,
+      context: ctx,
+      path: ctx.path,
+    }
 
     /** Data needs to always be an object or else nesting won't work */
     components.reduce((prev, { component, data = {} }) => {
@@ -98,7 +102,6 @@
     setup(Router) {
       Router.go = page.show
       Router.back = page.back
-      Router.getCurrentPath = () => page.current
     },
     data() {
       return {
@@ -106,6 +109,7 @@
         strict: true,
         hashbang: true,
         context: null,
+        path: null,
       }
     },
     onstate({ previous }) {
@@ -138,6 +142,10 @@
     },
     ondestroy() {
       delete this.root.router
-    }
+    },
+    methods: {
+      go: page.show,
+      back: page.back,
+    },
   }
 </script>

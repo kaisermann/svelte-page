@@ -88,6 +88,8 @@ Available events:
 - `routes` - The routes object `(default: undefined)`
 - `strict` - If false, match trailling slash `(default: true)`
 - `hashbang` - Add `#!` before urls `(default: true)`
+- `context` - The `page.js` context object
+- `path` - The current router path
 
 ## Slots
 
@@ -140,6 +142,23 @@ The `<Router />` adds itself to the `root` component as a `router` property, so 
 </script>
 ```
 
+## Methods
+
+```html
+<!-- Some other component down the hierarchy -->
+<script>
+  export default {
+    oncreate() {
+      /** Show the specified route with an optional data object */
+      this.root.router.go('/about', optionalData)
+
+      /** Go back to the previous route */
+      this.root.router.back()
+    }
+  }
+</script>
+```
+
 ## Static methods
 
 ```js
@@ -150,9 +169,6 @@ Router.go(path, optionalData)
 
 /** Go back to the previous route */
 Router.back()
-
-/** Get the router current path */
-Router.getCurrentPath() // '/about/me'
 ```
 
 ## Example
