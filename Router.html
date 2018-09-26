@@ -142,6 +142,7 @@
     },
     ondestroy() {
       delete this.root.router
+      page.stop()
     },
     methods: {
       go: page.show,
