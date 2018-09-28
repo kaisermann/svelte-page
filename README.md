@@ -90,6 +90,7 @@ Available events:
 - `hashbang` - Add `#!` before urls `(default: true)`
 - `context` - The `page.js` context object
 - `path` - The current router path
+- `pageInstance` - The current `page.js` instance
 
 ## Slots
 
@@ -144,6 +145,7 @@ The `<Router />` adds itself to the `root` component as a `router` property, so 
 
 ## Methods
 
+
 ```html
 <!-- Some other component down the hierarchy -->
 <script>
@@ -151,24 +153,13 @@ The `<Router />` adds itself to the `root` component as a `router` property, so 
     oncreate() {
       /** Show the specified route with an optional data object */
       this.root.router.go('/about', optionalData)
+      this.root.router.push('/about', optionalData)
 
       /** Go back to the previous route */
       this.root.router.back()
     }
   }
 </script>
-```
-
-## Static methods
-
-```js
-import Router from 'svelte-page/Router.html'
-
-/** Show the specified route with an optional data object */
-Router.go(path, optionalData)
-
-/** Go back to the previous route */
-Router.back()
 ```
 
 ## Example

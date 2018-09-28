@@ -3,150 +3,69 @@
 </NestedRoute>
 
 <script>
-  import page from 'page'
-
-  /** Creates a route callback with the specified data */
-  const getRouteMiddleware = (routePath, routes) => {
-    if (routes[routePath].constructor !== Object) {
-      routes[routePath] = { component: routes[routePath] }
-    }
-
-    const { data = {}, loader } = routes[routePath]
-    let hasPreloaded = false
-
-    const loadPreloads = () => {
-      const { preload } = routes[routePath]
-      setTimeout(() =>
-        preload.forEach(preloadRoute => {
-          const loader = routes[preloadRoute].loader
-          if (typeof loader === 'function') {
-            loader().then(({ default: component }) => {
-              routes[preloadRoute].component = component
-            })
-          }
-        }),
-      )
-      hasPreloaded = true
-    }
-
-    return (ctx, next) => {
-      const {
-        components,
-        params,
-        state: { path, ...state },
-      } = ctx
-
-      const { component, preload } = routes[routePath]
-
-      /** Remove pathregexp path match */
-      delete params[0]
-      const routeData = Object.assign({}, data, state, { params })
-
-      /** If no component present and */
-      if (!component) {
-        /** If there's a loader function, load it */
-        if (typeof loader === 'function') {
-          loader().then(({ default: component }) => {
-            components.push({ component, data: routeData })
-            if (preload && !hasPreloaded) {
-              loadPreloads()
-            }
-            next()
-          })
-        } else {
-          throw new Error(
-            '[svelte-router] No component for route "' + routePath + '"',
-          )
-        }
-        return
-      }
-
-      components.push({ component, data: routeData })
-      if (preload && !hasPreloaded) {
-        loadPreloads()
-      }
-      next()
-    }
-  }
-
-  const getSveltedHierarchy = Router => ctx => {
-    const { components } = ctx
-    const props = {
-      page: null,
-      context: ctx,
-      path: ctx.path,
-    }
-
-    /** Data needs to always be an object or else nesting won't work */
-    components.reduce((prev, { component, data = {} }) => {
-      data.page = null
-      prev.page = {
-        child: component,
-        props: data,
-      }
-
-      return prev.page.props
-    }, props)
-
-    Router.store.fire('router:beforeNavigation', ctx)
-
-    Router.set(props)
-
-    Router.store.fire('router:navigation', ctx)
-  }
+  import Page from 'page'
+  import { getRouteMiddleware, getSveltedHierarchy } from './helpers.js'
 
   export default {
     components: {
       NestedRoute: './NestedRoute.html',
     },
-    setup(Router) {
-      Router.go = page.show
-      Router.back = page.back
-    },
     data() {
       return {
+        /** Page.js instance */
+        pageInstance: null,
+        /** Current route page object */
         page: null,
         strict: true,
         hashbang: true,
+        /** Current route context */
         context: null,
+        /** Current path */
         path: null,
       }
     },
     onstate({ previous }) {
+      /** Add the router to the root component before its oncreate method */
       if (!previous) {
         this.root.router = this
       }
     },
     oncreate() {
+      const pageInstance = Page.create()
       const { routes, strict, hashbang } = this.get()
 
+      this.push = this.go = pageInstance.show
+      this.back = Page.back
+
       /** Set up the component hierarchy */
-      page('*', (ctx, next) => {
+      pageInstance('*', (ctx, next) => {
         ctx.components = []
         next()
       })
 
       /** Generate page routes */
       Object.keys(routes).forEach(path =>
-        page(path, getRouteMiddleware(path, routes)),
+        pageInstance(path, getRouteMiddleware(path, routes)),
       )
 
       /** Translate component array into svelte state */
-      page('*', getSveltedHierarchy(this))
+      pageInstance('*', getSveltedHierarchy(this))
 
       /** Allow trailing slash */
-      page.strict(strict)
+      pageInstance.strict(strict)
 
       /** Start the router */
-      page.start({ hashbang })
+      pageInstance.start({ hashbang })
+
+      this.set({ pageInstance })
     },
     ondestroy() {
+      const { pageInstance } = this.get()
+      pageInstance.stop()
+      pageInstance.prevContext = null
+      pageInstance.callbacks = []
+      pageInstance.exits = []
       delete this.root.router
-      page.stop()
-    },
-    methods: {
-      go: page.show,
-      back: page.back,
     },
   }
 </script>
