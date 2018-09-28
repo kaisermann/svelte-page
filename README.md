@@ -200,7 +200,7 @@ Router.back()
           /**
            * Page will have {page.child} because of nested routes
            **/
-          "/about/*": AboutPersonTemplate
+          "/about/*": AboutPersonTemplate,
           /** Page will have a {params.whoami} prop */
           "/about/:whoami": AboutPerson
         }
@@ -218,7 +218,7 @@ Router.back()
 <script>
   export default {
     components: {
-      Router: 'svelte-page/NestedRoute.html',
+      NestedRoute: 'svelte-page/NestedRoute.html',
     },
   }
 </script>
