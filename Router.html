@@ -13,7 +13,7 @@
     data() {
       return {
         /** Page.js instance */
-        pageInstance: null,
+        _pageInstance: null,
         /** Current route page object */
         page: null,
         strict: true,
@@ -31,40 +31,44 @@
       }
     },
     oncreate() {
-      const pageInstance = Page.create()
+      /**
+       * TODO: Multiple instance support disabled
+       * until duplicated events issue is fixed
+       * */
+      const _pageInstance = Page // Page.create()
       const { routes, strict, hashbang } = this.get()
 
-      this.push = this.go = pageInstance.show
-      this.back = Page.back
+      this.push = this.go = _pageInstance.show
+      this.back = _pageInstance.back
 
       /** Set up the component hierarchy */
-      pageInstance('*', (ctx, next) => {
+      _pageInstance('*', (ctx, next) => {
         ctx.components = []
         next()
       })
 
       /** Generate page routes */
       Object.keys(routes).forEach(path =>
-        pageInstance(path, getRouteMiddleware(path, routes)),
+        _pageInstance(path, getRouteMiddleware(path, routes)),
       )
 
       /** Translate component array into svelte state */
-      pageInstance('*', getSveltedHierarchy(this))
+      _pageInstance('*', getSveltedHierarchy(this))
 
       /** Allow trailing slash */
-      pageInstance.strict(strict)
+      _pageInstance.strict(strict)
 
       /** Start the router */
-      pageInstance.start({ hashbang })
+      _pageInstance.start({ hashbang })
 
-      this.set({ pageInstance })
+      this.set({ _pageInstance })
     },
     ondestroy() {
-      const { pageInstance } = this.get()
-      pageInstance.stop()
-      pageInstance.prevContext = null
-      pageInstance.callbacks = []
-      pageInstance.exits = []
+      const { _pageInstance } = this.get()
+      _pageInstance.stop()
+      _pageInstance.prevContext = null
+      _pageInstance.callbacks = []
+      _pageInstance.exits = []
       delete this.root.router
     },
   }
