@@ -3,8 +3,12 @@
 </NestedRoute>
 
 <script>
-  import Page from 'page'
-  import { getRouteMiddleware, getSveltedHierarchy } from './helpers.js'
+  import Page from 'page';
+  import { getRouteMiddleware, getSveltedHierarchy } from './helpers.js';
+
+  /** Workaround to prevent the default popstate/click event bindings */
+  Page.start();
+  Page.stop();
 
   export default {
     components: {
@@ -22,54 +26,50 @@
         context: null,
         /** Current path */
         path: null,
-      }
+      };
     },
     onstate({ previous }) {
       /** Add the router to the root component before its oncreate method */
       if (!previous) {
-        this.root.router = this
+        this.root.router = this;
       }
     },
     oncreate() {
-      /**
-       * TODO: Multiple instance support disabled
-       * until duplicated events issue is fixed
-       * */
-      const _pageInstance = Page // Page.create()
-      const { routes, strict, hashbang } = this.get()
+      const _pageInstance = Page.create();
+      const { routes, strict, hashbang } = this.get();
 
-      this.push = this.go = _pageInstance.show
-      this.back = _pageInstance.back
+      this.push = this.go = _pageInstance.show;
+      this.back = _pageInstance.back;
 
       /** Set up the component hierarchy */
       _pageInstance('*', (ctx, next) => {
-        ctx.components = []
-        next()
-      })
+        ctx.components = [];
+        next();
+      });
 
       /** Generate page routes */
       Object.keys(routes).forEach(path =>
         _pageInstance(path, getRouteMiddleware(path, routes)),
-      )
+      );
 
       /** Translate component array into svelte state */
-      _pageInstance('*', getSveltedHierarchy(this))
+      _pageInstance('*', getSveltedHierarchy(this));
 
       /** Allow trailing slash */
-      _pageInstance.strict(strict)
+      _pageInstance.strict(strict);
 
       /** Start the router */
-      _pageInstance.start({ hashbang })
+      _pageInstance.start({ hashbang });
 
-      this.set({ _pageInstance })
+      this.set({ _pageInstance });
     },
     ondestroy() {
-      const { _pageInstance } = this.get()
-      _pageInstance.stop()
-      _pageInstance.prevContext = null
-      _pageInstance.callbacks = []
-      _pageInstance.exits = []
-      delete this.root.router
+      const { _pageInstance } = this.get();
+      _pageInstance.stop();
+      _pageInstance.prevContext = null;
+      _pageInstance.callbacks = [];
+      _pageInstance.exits = [];
+      delete this.root.router;
     },
-  }
+  };
 </script>
