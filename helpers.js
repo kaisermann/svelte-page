@@ -81,9 +81,13 @@ export const getSveltedHierarchy = Router => ctx => {
     return prev.page.props;
   }, props);
 
-  Router.store.fire('router:beforeNavigation', ctx);
+  if(Router.store){
+    Router.store.fire('router:beforeNavigation', ctx);
+  }
 
   Router.set(props);
 
-  Router.store.fire('router:navigation', ctx);
+  if(Router.store) {
+    Router.store.fire('router:navigation', ctx);
+  }
 };
