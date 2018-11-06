@@ -88,9 +88,11 @@ Available events:
 - `routes` - The routes object `(default: undefined)`
 - `strict` - If false, match trailling slash `(default: true)`
 - `hashbang` - Add `#!` before urls `(default: true)`
+
+**Dynamic**:
+
 - `context` - The `page.js` context object
 - `path` - The current router path
-- `pageInstance` - The current `page.js` instance
 
 ## Slots
 
@@ -108,6 +110,8 @@ Both `<Router>` and `<NestedRoute>` have the optional `default` slot which is on
 
 ## Events
 
+### Component events
+
 When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFound` event.
 
 ```html
@@ -115,18 +119,7 @@ When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFou
 <NestedRoute on:notFound="console.log('NestedRoute not found!!!')" />
 ```
 
-## Root and Store events
-
-The `<Router />` emits events on the `store`:
-
-- `router:beforeNavigation` before a route render.
-- `router:navigation` after a route render.
-
-```js
-this.store.on('router:navigation', context => {
-  console.log('Current path:', context.path)
-})
-```
+---
 
 The `<Router />` adds itself to the `root` component as a `router` property, so it's also possible to get the context by observing its lifecycle:
 
@@ -143,20 +136,44 @@ The `<Router />` adds itself to the `root` component as a `router` property, so 
 </script>
 ```
 
-## Methods
+### Static events
 
+The `Router` constructor has a `change` event which can be listened in the same way as you would do with a svelte component:
+
+```js
+import Router from 'svelte-page'
+
+const onRouteChange = context => {
+  console.log('Current path:', context.path)
+}
+
+export default {
+  oncreate() {
+    Router.on('change', onRouteChange)
+  },
+  ondestroy() {
+    Router.off('change', onRouteChange)
+  },
+}
+```
+
+Do note these are **static** calls and we're not dealing directly with the `<Router/>` component.
+
+## Static Methods
 
 ```html
 <!-- Some other component down the hierarchy -->
 <script>
+  import Router from 'svelte-page'
+
   export default {
     oncreate() {
       /** Show the specified route with an optional data object */
-      this.root.router.go('/about', optionalData)
-      this.root.router.push('/about', optionalData)
+      Router.go('/about', optionalData)
+      Router.push('/about', optionalData)
 
       /** Go back to the previous route */
-      this.root.router.back()
+      Router.back()
     }
   }
 </script>

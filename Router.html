@@ -3,73 +3,90 @@
 </NestedRoute>
 
 <script>
-  import Page from 'page';
-  import { getRouteMiddleware, getSveltedHierarchy } from './helpers.js';
-
-  /** Workaround to prevent the default popstate/click event bindings */
-  Page.start();
-  Page.stop();
+  import Page from 'page'
+  import { getRouteMiddleware } from './helpers.js'
+  import Router from './Router.js'
 
   export default {
+    // TODO: how to do static things on future v3?
+    setup(RouterComponent) {
+      for (const key in Router) {
+        if (Router.hasOwnProperty(key)) {
+          RouterComponent[key] = Router[key]
+        }
+      }
+    },
     components: {
       NestedRoute: './NestedRoute.html',
     },
     data() {
       return {
-        /** Page.js instance */
-        _pageInstance: null,
-        /** Current route page object */
         page: null,
         strict: true,
         hashbang: true,
-        /** Current route context */
         context: null,
-        /** Current path */
-        path: null,
-      };
-    },
-    onstate({ previous }) {
-      /** Add the router to the root component before its oncreate method */
-      if (!previous) {
-        this.root.router = this;
       }
     },
     oncreate() {
-      const _pageInstance = Page.create();
-      const { routes, strict, hashbang } = this.get();
+      const { routes, strict, hashbang } = this.get()
 
-      this.push = this.go = _pageInstance.show;
-      this.back = _pageInstance.back;
+      // TODO: maybe remove in V3
+      this.push = this.go = Page.show
+      this.back = Page.back
 
       /** Set up the component hierarchy */
-      _pageInstance('*', (ctx, next) => {
-        ctx.components = [];
-        next();
-      });
+      Page('*', (ctx, next) => {
+        ctx.components = []
+        next()
+      })
 
       /** Generate page routes */
       Object.keys(routes).forEach(path =>
-        _pageInstance(path, getRouteMiddleware(path, routes)),
-      );
+        Page(path, getRouteMiddleware(path, routes)),
+      )
 
       /** Translate component array into svelte state */
-      _pageInstance('*', getSveltedHierarchy(this));
+      Page('*', ctx => {
+        const { components } = ctx
+        const props = {
+          page: null,
+          context: ctx,
+        }
+
+        /** Data needs to always be an object or else nesting won't work */
+        components.reduce((prev, { component, data = {} }) => {
+          data.page = null
+          prev.page = {
+            child: component,
+            props: data,
+          }
+
+          return prev.page.props
+        }, props)
+
+        this.set(props)
+
+        Router.fire('change', ctx)
+      })
 
       /** Allow trailing slash */
-      _pageInstance.strict(strict);
+      Page.strict(strict)
 
       /** Start the router */
-      _pageInstance.start({ hashbang });
-
-      this.set({ _pageInstance });
+      Page.start({ hashbang })
     },
     ondestroy() {
-      const { _pageInstance } = this.get();
-      _pageInstance.stop();
-      _pageInstance.prevContext = null;
-      _pageInstance.callbacks = [];
-      _pageInstance.exits = [];
-      delete this.root.router;
+      Page.stop()
+      Page.prevContext = null
+      Page.callbacks = []
+      Page.exits = []
+      Router.destroy()
     },
-  };
+    // TODO: rethink this when v3 is out
+    onstate({ previous }) {
+      if (!previous) {
+        this.root.router = this
+      }
+    },
+  }
 </script>

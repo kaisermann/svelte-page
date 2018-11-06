@@ -10,6 +10,8 @@
   "html.validate.scripts": false,
   "html.validate.styles": true,
 
+  "svelte.plugin.typescript.diagnostics.enable": false,
+
   "eslint.autoFixOnSave": true,
   "eslint.validate": [
     "javascript",
