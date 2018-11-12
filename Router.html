@@ -77,9 +77,9 @@
     },
     ondestroy() {
       Page.stop()
-      Page.prevContext = null
-      Page.callbacks = []
-      Page.exits = []
+      Page.prevContext = undefined;
+      Page.callbacks.length = 0;
+      Page.exits.length = 0;
       Router.destroy()
     },
     // TODO: rethink this when v3 is out
