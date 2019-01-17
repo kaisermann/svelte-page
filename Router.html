@@ -1,20 +1,21 @@
 <NestedRoute {page} on:notFound>
-  <slot></slot>
+	<slot></slot>
 </NestedRoute>
 
 <script>
   import Page from 'page'
   import { getRouteMiddleware } from './helpers.js'
-  import Router from './Router.js'
+
+  let currentCtx = null
 
   export default {
     // TODO: how to do static things on future v3?
-    setup(RouterComponent) {
-      for (const key in Router) {
-        if (Router.hasOwnProperty(key)) {
-          RouterComponent[key] = Router[key]
-        }
-      }
+    setup(Router) {
+      Router.push = Router.go = Page.show
+      Router.back = Page.back
+
+      Router.getContext = () => currentCtx
+      Router.getPath = () => currentCtx.path
     },
     components: {
       NestedRoute: './NestedRoute.html',
@@ -66,7 +67,10 @@
 
         this.set(props)
 
-        Router.fire('change', ctx)
+        currentCtx = ctx
+
+        this.fire('change', ctx)
+        this.root.fire('router:change', ctx)
       })
 
       /** Allow trailing slash */
@@ -77,10 +81,9 @@
     },
     ondestroy() {
       Page.stop()
-      Page.prevContext = undefined;
-      Page.callbacks.length = 0;
-      Page.exits.length = 0;
-      Router.destroy()
+      Page.prevContext = undefined
+      Page.callbacks.length = 0
+      Page.exits.length = 0
     },
     // TODO: rethink this when v3 is out
     onstate({ previous }) {

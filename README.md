@@ -112,11 +112,33 @@ Both `<Router>` and `<NestedRoute>` have the optional `default` slot which is on
 
 ### Component events
 
+#### `notFound`
+
 When a route isn't found, both the `<Router>` and `<NestedRoute>` fire a `notFound` event.
 
 ```html
 <Router on:notFound="console.log('Route not found!!!')" />
 <NestedRoute on:notFound="console.log('NestedRoute not found!!!')" />
+```
+
+#### `change`
+
+When a route change occurs, the `<Router/>` component fires a `change` event:
+
+```html
+<Router on:change="console.log('Route changed!!!')" />
+```
+
+This event is also fired at the `root` component with the name of `router:change`:
+
+```js
+export default {
+  oncreate() {
+    this.root.on('router:change', context => {
+      console.log('New path:', context.path)
+    })
+  },
+}
 ```
 
 ---
@@ -135,29 +157,6 @@ The `<Router />` adds itself to the `root` component as a `router` property, so 
   }
 </script>
 ```
-
-### Static events
-
-The `Router` constructor has a `change` event which can be listened in the same way as you would do with a svelte component:
-
-```js
-import Router from 'svelte-page'
-
-const onRouteChange = context => {
-  console.log('Current path:', context.path)
-}
-
-export default {
-  oncreate() {
-    Router.on('change', onRouteChange)
-  },
-  ondestroy() {
-    Router.off('change', onRouteChange)
-  },
-}
-```
-
-Do note these are **static** calls and we're not dealing directly with the `<Router/>` component.
 
 ## Static Methods
 
