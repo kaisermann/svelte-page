@@ -8,11 +8,19 @@
 
   let currentCtx = null
 
+  /**
+   * Stack of page instances.
+   * Allow to use 'static' methods for the 'last' available router
+   */
+  const pageInstances = []
+
   export default {
     // TODO: how to do static things on future v3?
     setup(Router) {
-      Router.push = Router.go = Page.show
-      Router.back = Page.back
+      Router.push = Router.go = (...args) =>
+        pageInstances[pageInstances.length - 1].show(...args)
+      Router.back = (...args) =>
+        pageInstances[pageInstances.length - 1].back(...args)
 
       Router.getContext = () => currentCtx
       Router.getPath = () => currentCtx.path
@@ -30,24 +38,27 @@
     },
     oncreate() {
       const { routes, strict, hashbang } = this.get()
+      this.pageInstance = Page.create()
 
       // TODO: maybe remove in V3
-      this.push = this.go = Page.show
-      this.back = Page.back
+      this.push = this.go = this.pageInstance.show
+      this.back = this.pageInstance.back
+
+      pageInstances.push(this.pageInstance)
 
       /** Set up the component hierarchy */
-      Page('*', (ctx, next) => {
+      this.pageInstance('*', (ctx, next) => {
         ctx.components = []
         next()
       })
 
       /** Generate page routes */
       Object.keys(routes).forEach(path =>
-        Page(path, getRouteMiddleware(path, routes)),
+        this.pageInstance(path, getRouteMiddleware(path, routes)),
       )
 
       /** Translate component array into svelte state */
-      Page('*', ctx => {
+      this.pageInstance('*', ctx => {
         const { components } = ctx
         const props = {
           page: null,
@@ -74,16 +85,18 @@
       })
 
       /** Allow trailing slash */
-      Page.strict(strict)
+      this.pageInstance.strict(strict)
 
       /** Start the router */
-      Page.start({ hashbang })
+      this.pageInstance.start({ hashbang })
     },
     ondestroy() {
-      Page.stop()
-      Page.prevContext = undefined
-      Page.callbacks.length = 0
-      Page.exits.length = 0
+      this.pageInstance.stop()
+      this.pageInstance.prevContext = undefined
+      this.pageInstance.callbacks.length = 0
+      this.pageInstance.exits.length = 0
+
+      pageInstances.pop(this.pageInstance)
     },
     // TODO: rethink this when v3 is out
     onstate({ previous }) {
