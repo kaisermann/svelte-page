@@ -1,6 +1,6 @@
 # svelte-page
 
-> Nested routing with [`page.js`](https://github.com/visionmedia/page.js) for svelte
+> Nested routing with [`page.js`](https://github.com/visionmedia/page.js) for svelte. For svelte v2 only.
 
 ## How to use
 
